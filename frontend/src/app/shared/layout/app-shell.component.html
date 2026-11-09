@@ -1,0 +1,16 @@
+<div class="shell">
+  <aside class="sidebar" aria-label="Navegação principal">
+    <a class="brand" routerLink="/" aria-label="Veloce início"><img class="brand-logo" src="assets/veloce-logo.png" alt="Veloce"></a>
+    <nav>
+      <a class="nav-item nav-item--active" routerLink="/" aria-current="page"><span class="nav-dot"></span>Visão geral</a>
+    </nav>
+    <div class="sidebar-bottom"><p class="sidebar-note">Ambiente local<br>Fundação do produto</p><button class="logout-button" type="button" (click)="logout()">Sair</button></div>
+  </aside>
+  <main class="main-content">
+    <header class="page-heading">
+      <div><p class="eyebrow">Operação / Início</p><h1>{{ title }}</h1><p class="description">{{ description }}</p></div>
+      <div class="environment-chip" aria-label="Ambiente local"><span class="status-dot"></span><span>Local</span></div>
+    </header>
+    <ng-content></ng-content>
+  </main>
+</div>

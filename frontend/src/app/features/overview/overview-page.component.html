@@ -1,0 +1,13 @@
+<veloce-app-shell title="Visão geral" description="A base para acompanhar a operação do seu estabelecimento.">
+  <section class="integration-banner" [class.integration-banner--error]="error" aria-labelledby="integration-title">
+    <div class="integration-copy"><p class="eyebrow eyebrow--light">01 / Integração</p><h2 id="integration-title">A conexão com a API está {{ health?.status === 'ok' ? 'ativa' : error ? 'indisponível' : 'sendo verificada' }}.</h2><p>O Veloce verifica a aplicação e o banco antes da operação começar.</p></div>
+    <span class="integration-badge" [class.integration-badge--error]="error"><span class="status-dot"></span>{{ error ? 'Indisponível' : loading ? 'Verificando' : 'Online' }}</span>
+  </section>
+  <section class="section-heading"><div><p class="eyebrow">02 / Fundação</p><h2>Estado da base</h2></div><p>Informações essenciais para começar a operar.</p></section>
+  <section class="overview-grid" aria-label="Status da base">
+    <article class="status-card"><div class="card-topline"><p class="card-label">Aplicação</p><span class="card-index">A</span></div><strong>{{ loading ? '—' : health?.application === 'ok' ? 'Operacional' : 'Indisponível' }}</strong><p>API REST do Veloce</p></article>
+    <article class="status-card"><div class="card-topline"><p class="card-label">Banco de dados</p><span class="card-index">B</span></div><strong>{{ loading ? '—' : health?.database === 'ok' ? 'Conectado' : 'Indisponível' }}</strong><p>Conexão MySQL verificada</p></article>
+    <article class="status-card status-card--next"><div class="card-topline"><p class="card-label">Próximo passo</p></div><strong>Estruturar o MVP</strong><p>Clientes, veículos e serviços</p></article>
+  </section>
+  <section class="empty-state"><span class="empty-index">03</span><div><p class="eyebrow">Próxima etapa</p><h2>Operação pronta para começar</h2><p>Os módulos de negócio serão adicionados nas próximas sprints. Esta tela confirma que a fundação está conectada.</p></div><span class="empty-rule" aria-hidden="true"></span></section>
+</veloce-app-shell>
