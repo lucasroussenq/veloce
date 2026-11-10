@@ -34,11 +34,27 @@ export class CustomerService {
     return this.http.post<Customer>(this.baseUrl, payload);
   }
 
+  update(customerId: number, payload: Pick<Customer, 'name' | 'email' | 'phone'>): Observable<Customer> {
+    return this.http.put<Customer>(`${this.baseUrl}/${customerId}`, payload);
+  }
+
+  remove(customerId: number): Observable<void> {
+    return this.http.delete<void>(`${this.baseUrl}/${customerId}`);
+  }
+
   listVehicles(customerId: number): Observable<{ data: Vehicle[] }> {
     return this.http.get<{ data: Vehicle[] }>(`${this.baseUrl}/${customerId}/vehicles`);
   }
 
   createVehicle(customerId: number, payload: Omit<Vehicle, 'id' | 'customer_id'>): Observable<Vehicle> {
     return this.http.post<Vehicle>(`${this.baseUrl}/${customerId}/vehicles`, payload);
+  }
+
+  updateVehicle(customerId: number, vehicleId: number, payload: Omit<Vehicle, 'id' | 'customer_id'>): Observable<Vehicle> {
+    return this.http.put<Vehicle>(`${this.baseUrl}/${customerId}/vehicles/${vehicleId}`, payload);
+  }
+
+  removeVehicle(customerId: number, vehicleId: number): Observable<void> {
+    return this.http.delete<void>(`${this.baseUrl}/${customerId}/vehicles/${vehicleId}`);
   }
 }

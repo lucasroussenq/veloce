@@ -67,6 +67,57 @@ class CustomerVehicleApiTest extends TestCase
             ->assertJsonValidationErrors(['name']);
     }
 
+    public function test_customer_can_be_updated_and_deleted_with_its_vehicles(): void
+    {
+        [$owner, $establishment] = $this->tenant('Lavagem Central', 'central@example.test');
+        $headers = ['X-Establishment-Id' => (string) $establishment->id];
+        $customer = $this->actingAs($owner, 'sanctum')->withHeaders($headers)
+            ->postJson('/api/customers', ['name' => 'Nome antigo'])
+            ->json();
+
+        $this->actingAs($owner, 'sanctum')->withHeaders($headers)
+            ->putJson('/api/customers/'.$customer['id'], ['name' => 'Nome atualizado', 'phone' => '41988888888'])
+            ->assertOk()
+            ->assertJsonPath('name', 'Nome atualizado');
+
+        $vehicle = $this->actingAs($owner, 'sanctum')->withHeaders($headers)
+            ->postJson('/api/customers/'.$customer['id'].'/vehicles', ['plate' => 'DEF4G56', 'model' => 'Honda Civic'])
+            ->json();
+
+        $this->actingAs($owner, 'sanctum')->withHeaders($headers)
+            ->deleteJson('/api/customers/'.$customer['id'])
+            ->assertNoContent();
+
+        $this->assertDatabaseMissing('customers', ['id' => $customer['id']]);
+        $this->assertDatabaseMissing('vehicles', ['id' => $vehicle['id']]);
+    }
+
+    public function test_vehicle_can_be_updated_and_deleted_only_inside_current_tenant(): void
+    {
+        [$owner, $establishment] = $this->tenant('Lavagem Central', 'central@example.test');
+        $headers = ['X-Establishment-Id' => (string) $establishment->id];
+        $customer = $this->actingAs($owner, 'sanctum')->withHeaders($headers)
+            ->postJson('/api/customers', ['name' => 'Ana Costa'])
+            ->json();
+        $vehicle = $this->actingAs($owner, 'sanctum')->withHeaders($headers)
+            ->postJson('/api/customers/'.$customer['id'].'/vehicles', ['plate' => 'GHI7J89', 'model' => 'Fiat Pulse'])
+            ->json();
+
+        $this->actingAs($owner, 'sanctum')->withHeaders($headers)
+            ->putJson('/api/customers/'.$customer['id'].'/vehicles/'.$vehicle['id'], ['plate' => 'GHI7J89', 'model' => 'Fiat Pulse Audace', 'color' => 'Azul'])
+            ->assertOk()
+            ->assertJsonPath('model', 'Fiat Pulse Audace');
+
+        [$otherOwner, $otherEstablishment] = $this->tenant('Lavagem Norte', 'north@example.test');
+        $this->actingAs($otherOwner, 'sanctum')->withHeaders(['X-Establishment-Id' => (string) $otherEstablishment->id])
+            ->deleteJson('/api/customers/'.$customer['id'].'/vehicles/'.$vehicle['id'])
+            ->assertNotFound();
+
+        $this->actingAs($owner, 'sanctum')->withHeaders($headers)
+            ->deleteJson('/api/customers/'.$customer['id'].'/vehicles/'.$vehicle['id'])
+            ->assertNoContent();
+    }
+
     private function tenant(string $name, string $email): array
     {
         $user = User::factory()->create(['email' => $email]);

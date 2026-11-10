@@ -41,4 +41,33 @@ class CustomerController
 
         return response()->json($record);
     }
+
+    public function update(Request $request, int $customer, TenantContext $tenantContext): JsonResponse
+    {
+        $record = $this->customer($request, $customer, $tenantContext);
+        $data = $request->validate([
+            'name' => ['required', 'string', 'max:160'],
+            'email' => ['nullable', 'email', 'max:255'],
+            'phone' => ['nullable', 'string', 'max:30'],
+            'notes' => ['nullable', 'string', 'max:2000'],
+        ]);
+        $record->update($data);
+
+        return response()->json($record->fresh());
+    }
+
+    public function destroy(Request $request, int $customer, TenantContext $tenantContext): JsonResponse
+    {
+        $record = $this->customer($request, $customer, $tenantContext);
+        $record->delete();
+
+        return response()->json([], 204);
+    }
+
+    private function customer(Request $request, int $customer, TenantContext $tenantContext): Customer
+    {
+        $tenant = $tenantContext->resolve($request, $request->user());
+
+        return Customer::where('establishment_id', $tenant->id)->findOrFail($customer);
+    }
 }

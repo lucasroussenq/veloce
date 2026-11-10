@@ -4,6 +4,8 @@ import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { AppShellComponent } from '../../shared/layout/app-shell.component';
 import { Customer, CustomerService, Vehicle } from '../../core/api/customer.service';
 
+type PendingDelete = { type: 'customer' | 'vehicle'; id: number; name: string; customerId?: number };
+
 @Component({
   selector: 'veloce-customers-page',
   standalone: true,
@@ -17,6 +19,9 @@ export class CustomersPageComponent implements OnInit {
   customers: Customer[] = [];
   vehicles: Vehicle[] = [];
   selectedCustomer: Customer | null = null;
+  editingCustomerId: number | null = null;
+  editingVehicleId: number | null = null;
+  pendingDelete: PendingDelete | null = null;
   loading = true;
   savingCustomer = false;
   savingVehicle = false;
@@ -69,12 +74,18 @@ export class CustomersPageComponent implements OnInit {
 
     this.savingCustomer = true;
     this.errorMessage = '';
-    this.customerService.create(this.customerForm.getRawValue()).subscribe({
+    const request = this.editingCustomerId === null
+      ? this.customerService.create(this.customerForm.getRawValue())
+      : this.customerService.update(this.editingCustomerId, this.customerForm.getRawValue());
+    request.subscribe({
       next: (customer) => {
-        this.customers = [...this.customers, { ...customer, vehicles_count: 0 }].sort((a, b) => a.name.localeCompare(b.name));
+        this.customers = this.editingCustomerId === null
+          ? [...this.customers, { ...customer, vehicles_count: 0 }].sort((a, b) => a.name.localeCompare(b.name))
+          : this.customers.map((item) => item.id === customer.id ? { ...item, ...customer } : item);
         this.customerForm.reset();
+        this.editingCustomerId = null;
         this.savingCustomer = false;
-        this.selectCustomer(customer);
+        this.selectCustomer(this.customers.find((item) => item.id === customer.id) ?? customer);
       },
       error: () => { this.savingCustomer = false; this.errorMessage = 'Não foi possível salvar o cliente.'; },
     });
@@ -88,14 +99,84 @@ export class CustomersPageComponent implements OnInit {
 
     this.savingVehicle = true;
     this.errorMessage = '';
-    this.customerService.createVehicle(this.selectedCustomer.id, this.vehicleForm.getRawValue()).subscribe({
+    const request = this.editingVehicleId === null
+      ? this.customerService.createVehicle(this.selectedCustomer.id, this.vehicleForm.getRawValue())
+      : this.customerService.updateVehicle(this.selectedCustomer.id, this.editingVehicleId, this.vehicleForm.getRawValue());
+    request.subscribe({
       next: (vehicle) => {
-        this.vehicles = [...this.vehicles, vehicle];
-        this.customers = this.customers.map((customer) => customer.id === this.selectedCustomer?.id ? { ...customer, vehicles_count: (customer.vehicles_count ?? 0) + 1 } : customer);
+        this.vehicles = this.editingVehicleId === null ? [...this.vehicles, vehicle] : this.vehicles.map((item) => item.id === vehicle.id ? vehicle : item);
+        if (this.editingVehicleId === null) {
+          this.customers = this.customers.map((customer) => customer.id === this.selectedCustomer?.id ? { ...customer, vehicles_count: (customer.vehicles_count ?? 0) + 1 } : customer);
+        }
         this.vehicleForm.reset();
+        this.editingVehicleId = null;
         this.savingVehicle = false;
       },
       error: () => { this.savingVehicle = false; this.errorMessage = 'Não foi possível salvar o veículo.'; },
+    });
+  }
+
+  editCustomer(customer: Customer): void {
+    this.editingCustomerId = customer.id;
+    this.customerForm.patchValue({ name: customer.name, email: customer.email ?? '', phone: customer.phone ?? '' });
+  }
+
+  cancelCustomerEdit(): void {
+    this.editingCustomerId = null;
+    this.customerForm.reset();
+  }
+
+  requestDeleteCustomer(customer: Customer): void {
+    this.pendingDelete = { type: 'customer', id: customer.id, name: customer.name };
+  }
+
+  editVehicle(vehicle: Vehicle): void {
+    this.editingVehicleId = vehicle.id;
+    this.vehicleForm.patchValue({ plate: vehicle.plate, model: vehicle.model, color: vehicle.color ?? '', year: vehicle.year });
+  }
+
+  cancelVehicleEdit(): void {
+    this.editingVehicleId = null;
+    this.vehicleForm.reset();
+  }
+
+  requestDeleteVehicle(vehicle: Vehicle): void {
+    if (!this.selectedCustomer) {
+      return;
+    }
+
+    this.pendingDelete = { type: 'vehicle', id: vehicle.id, name: vehicle.plate, customerId: this.selectedCustomer.id };
+  }
+
+  cancelDelete(): void {
+    this.pendingDelete = null;
+  }
+
+  confirmDelete(): void {
+    const pending = this.pendingDelete;
+    if (!pending) {
+      return;
+    }
+
+    const request = pending.type === 'customer'
+      ? this.customerService.remove(pending.id)
+      : this.customerService.removeVehicle(pending.customerId as number, pending.id);
+
+    request.subscribe({
+      next: () => {
+        if (pending.type === 'customer') {
+          this.customers = this.customers.filter((item) => item.id !== pending.id);
+          if (this.selectedCustomer?.id === pending.id) {
+            this.selectedCustomer = null;
+            this.vehicles = [];
+          }
+        } else {
+          this.vehicles = this.vehicles.filter((item) => item.id !== pending.id);
+          this.customers = this.customers.map((customer) => customer.id === this.selectedCustomer?.id ? { ...customer, vehicles_count: Math.max((customer.vehicles_count ?? 1) - 1, 0) } : customer);
+        }
+        this.pendingDelete = null;
+      },
+      error: () => { this.errorMessage = `Não foi possível excluir ${pending.type === 'customer' ? 'o cliente' : 'o veículo'}.`; this.pendingDelete = null; },
     });
   }
 
