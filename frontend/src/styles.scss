@@ -24,12 +24,13 @@ a { color: inherit; text-decoration: none; }
 .shell { display: grid; min-height: 100vh; grid-template-columns: 248px minmax(0, 1fr); }
 .sidebar { display: flex; flex-direction: column; padding: 30px 22px 24px; background: var(--navy); color: var(--white); }
 .brand { display: inline-flex; align-items: center; gap: 11px; width: fit-content; font-size: 1.32rem; font-weight: 700; letter-spacing: -.055em; }
+.sidebar .brand { width: 100%; justify-content: center; }
 .brand-logo { display: block; width: 154px; height: auto; object-fit: contain; object-position: left center; }
 nav { margin-top: 72px; }
 .nav-item { display: flex; align-items: center; gap: 11px; padding: 12px; color: #aebbd0; font-size: .82rem; font-weight: 600; }
 .nav-item--active { background: rgba(255,255,255,.1); color: var(--white); }
-.nav-dot, .status-dot { display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: var(--green); }
-.nav-item .nav-dot { background: currentColor; }
+.nav-icon { flex: 0 0 17px; width: 17px; height: 17px; fill: none; stroke: currentColor; stroke-linecap: round; stroke-linejoin: round; stroke-width: 1.7; }
+.status-dot { display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: var(--green); }
 .sidebar-bottom { margin-top: auto; }.sidebar-note { margin: 0 0 17px; color: var(--muted-dark); font-size: .7rem; line-height: 1.7; }.logout-button { padding: 0; border: 0; background: transparent; color: #c9d3e3; cursor: pointer; font: inherit; font-size: .72rem; }.logout-button:hover { color: var(--white); }
 
 .main-content { width: 100%; max-width: 1360px; padding: 50px clamp(24px, 5vw, 84px) 72px; }
