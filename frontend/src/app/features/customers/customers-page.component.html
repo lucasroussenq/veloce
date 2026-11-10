@@ -1,0 +1,20 @@
+<veloce-app-shell title="Clientes e veículos" description="Mantenha o histórico de cada pessoa e dos veículos atendidos.">
+  <div class="customers-layout">
+    <section class="customer-list-panel" aria-labelledby="customers-title">
+      <div class="section-heading section-heading--compact"><div><p class="eyebrow">01 / Cadastro</p><h2 id="customers-title">Clientes</h2></div><span class="record-count">{{ customerCountLabel }}</span></div>
+      <label class="search-field"><span>Buscar cliente</span><input type="search" [value]="searchTerm" (input)="searchTerm = $any($event.target).value" placeholder="Nome, e-mail ou telefone"></label>
+      <p *ngIf="errorMessage" class="inline-error" role="alert">{{ errorMessage }}</p>
+      <div *ngIf="loading" class="panel-message">Carregando clientes...</div>
+      <div *ngIf="!loading && customers.length === 0" class="panel-message panel-message--empty"><strong>Nenhum cliente cadastrado</strong><span>Comece adicionando o primeiro cliente da operação.</span></div>
+      <div *ngIf="!loading && customers.length > 0 && filteredCustomers.length === 0" class="panel-message panel-message--empty"><strong>Nenhum resultado encontrado</strong><span>Tente buscar por outro nome, e-mail ou telefone.</span></div>
+      <button *ngFor="let customer of filteredCustomers" class="customer-row" [class.customer-row--active]="selectedCustomer?.id === customer.id" type="button" (click)="selectCustomer(customer)">
+        <span class="customer-initial">{{ customer.name.charAt(0).toUpperCase() }}</span><span class="customer-data"><strong>{{ customer.name }}</strong><small>{{ customer.phone || customer.email || 'Sem contato informado' }}</small></span><span class="customer-vehicles">{{ customer.vehicles_count || 0 }} veículos</span>
+      </button>
+      <div *ngIf="selectedCustomer" class="customer-detail"><div><p class="eyebrow">Cliente selecionado</p><h3>{{ selectedCustomer.name }}</h3></div><div class="customer-detail-meta"><span>{{ selectedCustomer.email || 'E-mail não informado' }}</span><span>{{ selectedCustomer.phone || 'Telefone não informado' }}</span><span>{{ vehicles.length }} {{ vehicles.length === 1 ? 'veículo cadastrado' : 'veículos cadastrados' }}</span></div></div>
+    </section>
+    <aside class="customer-side-panel">
+      <section class="form-panel" aria-labelledby="new-customer-title"><p class="eyebrow">02 / Novo registro</p><h2 id="new-customer-title">Adicionar cliente</h2><form [formGroup]="customerForm" (ngSubmit)="saveCustomer()"><label>Nome completo<input type="text" formControlName="name" placeholder="Nome do cliente"></label><label>E-mail<input type="email" formControlName="email" placeholder="cliente@empresa.com"></label><label>Telefone<input type="tel" formControlName="phone" placeholder="(41) 00000-0000"></label><button class="primary-button" type="submit" [disabled]="savingCustomer">{{ savingCustomer ? 'Salvando...' : 'Salvar cliente' }}</button></form></section>
+      <section *ngIf="selectedCustomer" class="form-panel form-panel--vehicle" aria-labelledby="new-vehicle-title"><p class="eyebrow">03 / Veículo de {{ selectedCustomer.name }}</p><h2 id="new-vehicle-title">Adicionar veículo</h2><div class="vehicle-list"><span *ngIf="vehicles.length === 0">Nenhum veículo cadastrado.</span><span *ngFor="let vehicle of vehicles"><strong>{{ vehicle.plate }}</strong> {{ vehicle.model }}</span></div><form [formGroup]="vehicleForm" (ngSubmit)="saveVehicle()"><label>Placa<input type="text" formControlName="plate" placeholder="ABC1D23"></label><label>Modelo<input type="text" formControlName="model" placeholder="Toyota Corolla"></label><div class="form-columns"><label>Cor<input type="text" formControlName="color" placeholder="Prata"></label><label>Ano<input type="number" formControlName="year" placeholder="2024"></label></div><button class="secondary-button" type="submit" [disabled]="savingVehicle">{{ savingVehicle ? 'Salvando...' : 'Salvar veículo' }}</button></form></section>
+    </aside>
+  </div>
+</veloce-app-shell>

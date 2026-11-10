@@ -7,7 +7,7 @@
   <section class="overview-grid" aria-label="Status da base">
     <article class="status-card"><div class="card-topline"><p class="card-label">Aplicação</p><span class="card-index">A</span></div><strong>{{ loading ? '—' : health?.application === 'ok' ? 'Operacional' : 'Indisponível' }}</strong><p>API REST do Veloce</p></article>
     <article class="status-card"><div class="card-topline"><p class="card-label">Banco de dados</p><span class="card-index">B</span></div><strong>{{ loading ? '—' : health?.database === 'ok' ? 'Conectado' : 'Indisponível' }}</strong><p>Conexão MySQL verificada</p></article>
-    <article class="status-card status-card--next"><div class="card-topline"><p class="card-label">Próximo passo</p></div><strong>Estruturar o MVP</strong><p>Clientes, veículos e serviços</p></article>
+    <a class="status-card status-card--next" routerLink="/clientes"><div class="card-topline"><p class="card-label">Próximo passo</p></div><strong>Clientes e veículos</strong><p>Começar o cadastro da operação</p></a>
   </section>
   <section class="empty-state"><span class="empty-index">03</span><div><p class="eyebrow">Próxima etapa</p><h2>Operação pronta para começar</h2><p>Os módulos de negócio serão adicionados nas próximas sprints. Esta tela confirma que a fundação está conectada.</p></div><span class="empty-rule" aria-hidden="true"></span></section>
 </veloce-app-shell>

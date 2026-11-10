@@ -2,11 +2,12 @@ import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { AppShellComponent } from '../../shared/layout/app-shell.component';
 import { HealthResponse, HealthService } from '../../core/api/health.service';
+import { RouterLink } from '@angular/router';
 
 @Component({
   selector: 'veloce-overview-page',
   standalone: true,
-  imports: [CommonModule, AppShellComponent],
+  imports: [CommonModule, AppShellComponent, RouterLink],
   templateUrl: './overview-page.component.html',
 })
 export class OverviewPageComponent implements OnInit {

@@ -2,7 +2,8 @@
   <aside class="sidebar" aria-label="Navegação principal">
     <a class="brand" routerLink="/" aria-label="Veloce início"><img class="brand-logo" src="assets/veloce-logo.png" alt="Veloce"></a>
     <nav>
-      <a class="nav-item nav-item--active" routerLink="/" aria-current="page"><span class="nav-dot"></span>Visão geral</a>
+      <a class="nav-item" routerLink="/" routerLinkActive="nav-item--active" [routerLinkActiveOptions]="{ exact: true }"><span class="nav-dot"></span>Visão geral</a>
+      <a class="nav-item" routerLink="/clientes" routerLinkActive="nav-item--active"><span class="nav-dot"></span>Clientes e veículos</a>
     </nav>
     <div class="sidebar-bottom"><p class="sidebar-note">Ambiente local<br>Fundação do produto</p><button class="logout-button" type="button" (click)="logout()">Sair</button></div>
   </aside>
